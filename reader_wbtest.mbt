@@ -1,4 +1,5 @@
 // Hand-specified ESRI point record, independent of the SHP encoder.
+
 ///|
 fn point_fixture() -> Bytes {
   let w = ByteWriter::new()
