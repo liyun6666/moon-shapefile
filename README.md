@@ -15,3 +15,5 @@ let parsed = @moonbit9.read_shp(files.shp)
 
 Run `moon test` for the binary, geometry and interoperability regression suite.
 The accepted scope and explicit non-goals are in [docs/design.md](docs/design.md).
+
+Run the minimal executable example with `moon run cmd/main`.
