@@ -16,12 +16,6 @@ fn ByteReader::be16(self : ByteReader) -> Int raise ShapeError {
 }
 
 ///|
-fn ByteReader::u8(self : ByteReader) -> Int raise ShapeError {
-  self.require(1)
-  let value = self.data[self.pos].to_int()
-  self.pos += 1
-  value
-}
 
 ///|
 fn ByteWriter::le16(self : ByteWriter, n : Int) -> Unit {
@@ -36,15 +30,12 @@ fn ByteWriter::be16(self : ByteWriter, n : Int) -> Unit {
 }
 
 ///|
-fn ByteWriter::u8(self : ByteWriter, n : Int) -> Unit {
-  self.data.push(n.to_byte())
-}
 
 ///|
 fn crc32(data : Bytes) -> UInt {
   let mut crc : UInt = 0xffffffff
   for byte in data {
-    crc = crc ^ byte.to_int().to_uint()
+    crc = crc ^ byte.to_int().reinterpret_as_uint()
     for _ in 0..<8 {
       crc = if (crc & 1) != 0 { (crc >> 1) ^ 0xedb88320 } else { crc >> 1 }
     }

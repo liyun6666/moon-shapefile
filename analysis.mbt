@@ -124,6 +124,96 @@ pub fn count_parts(shapes : Array[Shape]) -> Int raise ShapeError {
 }
 
 ///|
+/// Return the first record that contains a point under inclusive XY semantics.
+pub fn locate_point(
+  shapes : Array[Shape],
+  point : Coordinate,
+) -> Int? raise ShapeError {
+  for i in 0..<shapes.length() {
+    if shapes[i].contains_point(point) {
+      return Some(i)
+    }
+  }
+  None
+}
+
+///|
+/// Compute a histogram of records by ShapeType numeric code.
+pub fn type_histogram(shapes : Array[Shape]) -> Map[Int, Int] raise ShapeError {
+  let result : Map[Int, Int] = Map([])
+  for shape in shapes {
+    shape.validate()
+    let code = shape.kind.code()
+    result[code] = result.get(code).unwrap_or(0) + 1
+  }
+  result
+}
+
+///|
+/// Check that all bounds are finite and mutually compatible with their shapes.
+pub fn validate_bounds(
+  shapes : Array[Shape],
+  declared : Bounds,
+) -> Unit raise ShapeError {
+  declared.validate()
+  for shape in shapes {
+    shape.validate()
+    match shape.bounds() {
+      Some(b) =>
+        if b.xmin < declared.xmin ||
+          b.ymin < declared.ymin ||
+          b.xmax > declared.xmax ||
+          b.ymax > declared.ymax {
+          raise InvalidData(0, "shape lies outside declared bounds")
+        }
+      None => ()
+    }
+  }
+}
+
+///|
+/// Calculate the fraction of points that carry a Z ordinate.
+pub fn z_coverage(shapes : Array[Shape]) -> Double raise ShapeError {
+  let mut total = 0
+  let mut with_z = 0
+  for shape in shapes {
+    shape.validate()
+    for p in shape.points {
+      total += 1
+      if p.z is Some(_) {
+        with_z += 1
+      }
+    }
+  }
+  if total == 0 {
+    0.0
+  } else {
+    with_z.to_double() / total.to_double()
+  }
+}
+
+///|
+/// Calculate the fraction of points that carry an M ordinate.
+pub fn m_coverage(shapes : Array[Shape]) -> Double raise ShapeError {
+  let mut total = 0
+  let mut with_m = 0
+  for shape in shapes {
+    shape.validate()
+    for p in shape.points {
+      total += 1
+      if p.m is Some(_) {
+        with_m += 1
+      }
+    }
+  }
+  if total == 0 {
+    0.0
+  } else {
+    with_m.to_double() / total.to_double()
+  }
+}
+
+///|
 test "summarize and spatial selection preserve physical order" {
   let shapes = [
     { kind: Point, points: [coordinate(1.0, 2.0)], parts: [] },
