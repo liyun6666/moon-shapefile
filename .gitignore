@@ -1,0 +1,7 @@
+_build/
+target/
+.mooncakes/
+.worktrees/
+.venv/
+__pycache__/
+artifacts/
