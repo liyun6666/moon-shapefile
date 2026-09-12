@@ -1,7 +1,7 @@
-# DBF codec
+# DBF 属性表编解码器
 
-Independent dBASE III (version 0x03, no memo) codec. Public Table, Row, Field and
-Value types are directly constructible. `read` and `write` default to strict UTF-8;
+这是独立实现的 dBASE III（版本 0x03，不含 Memo）编解码器。`Table`、`Row`、`Field`
+和 `Value` 类型可以直接构造。`read` 和 `write` 默认使用严格 UTF-8；
 pass `encoding=Latin1` explicitly for ISO-8859-1. No encoding is guessed from the
 language-driver byte. Field names are unique, case-sensitive printable ASCII,
 1–10 bytes. Character fields support widths 1–255 bytes.

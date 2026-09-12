@@ -1,42 +1,42 @@
-# moonbit9 accepted design
+# moonbit9 设计说明
 
-Owner/applicant: 马昀昀, 1498657823@qq.com. Only destination repository:
-https://github.com/liyun6666/moonbit9 (remote default branch main).
+项目负责人：马昀昀。唯一提交仓库为
+<https://github.com/liyun6666/moonbit9>，远程默认分支为 `main`。
 
-Core library: in-memory Bytes API with checked offsets, typed geometry and bounded
-record decoding. SHP and SHX share header validation; SHX offsets are checked
-against the actual SHP record boundaries. Null, Point, MultiPoint, PolyLine,
-Polygon and Z/M variants are supported. Nonfinite coordinates are rejected.
-DBF is an independent package with explicit encoding and exact numeric text.
-Dataset joins geometry and attributes by physical record index, including deleted
-records. Selection always preserves this alignment. CLI is a thin native adapter.
+## 定位与接口
 
-Geometry model: public ShapeType enum (Null, Point, PolyLine, Polygon, MultiPoint,
-PointZ, PolyLineZ, PolygonZ, MultiPointZ, PointM, PolyLineM, PolygonM, MultiPointM).
-Coordinate {x:Double,y:Double,z:Double?,m:Double?}; Shape {kind:ShapeType,
-points:Array[Coordinate],parts:Array[Int]}. Bounds {xmin,ymin,xmax,ymax:Double}.
-Record {number:Int,offset:Int,content_length:Int,shape:Shape}.
-Shapefile {kind:ShapeType,records:Array[Record],bounds:Bounds?}.
-API read_shp(Bytes)->Shapefile raise ShapeError;
-write_shp(ShapeType,Array[Shape])->ShapeFiles raise ShapeError;
-ShapeFiles {shp:Bytes,shx:Bytes}; validate_shx(Bytes,Bytes)->Unit raise ShapeError.
+本项目使用 MoonBit 原生 `Bytes` 接口处理 SHP、SHX 和 DBF 数据，不依赖其他
+语言运行时。二进制读取器先检查边界、长度和资源限制，再创建类型化几何记录。
+SHP 与 SHX 共用文件头校验，SHX 的偏移和记录长度必须与 SHP 实际记录边界一致。
 
-Explicit boundaries: no projection transformations, no MultiPatch, no DBF Memo,
-no network/ZIP reads. PRJ is preserved, not interpreted. GeoJSON output assumes
-the caller supplies longitude/latitude; projected inputs require explicit opt-in
-to non-RFC7946 coordinate output. Z is retained; M remains in shapefile only.
-Polygon rings are grouped by containment; invalid intersecting rings rejected.
+主要接口包括 `read_shp`、`write_shp`、`read_index`、`validate_shx`、
+`read_dataset`、`write_dataset`、`shape_from_geojson` 和
+`Shape::to_geojson`。数据集通过物理记录编号连接几何和 DBF 行；删除标记会保留，
+筛选也不会改变剩余行与几何的对应关系。
 
-Usable workflows: administrative polygons -> GeoJSON; facilities -> bbox and
-attribute subset -> shapefile; survey geometry/attributes -> interoperable files.
-Validation: independent binary literals; malformed lengths/counts/indexes;
-PyShp-generated data read by MoonBit and MoonBit output read by PyShp; deterministic
-random geometries; meaningful regression cases. CI check/build/test and interop.
-Target >4000 effective MoonBit implementation lines excluding tests, blank lines,
-comments and generated code. No filler. At least ten meaningful development commits.
-Upstream: PyShp https://github.com/GeospatialPython/pyshp MIT; ESRI format reference.
-Do not claim full PyShp parity. Preserve upstream notice in THIRD_PARTY.md.
+## 几何模型
 
-Ruling: use this otherwise-empty clone on develop; no existing checkout to protect.
-Ruling: GitHub push is user-authorized but credentials currently lack permission.
-Ruling: continue independent local work while user resolves repository access.
+支持 Null、Point、MultiPoint、PolyLine、Polygon 及其 Z/M 变体。坐标由 X、Y
+以及可选的 Z、M 组成；所有坐标和范围都必须是有限数。多部件几何通过 `parts`
+保存每个部件的起始点。多边形导出时会检查环的闭合、相交、包含关系和方向，
+不合法拓扑会返回错误，而不是静默修正。
+
+## 交付边界
+
+首版明确不实现坐标投影转换、MultiPatch、DBF Memo、网络读取和 ZIP 读取。`.prj`
+作为配套文本保存但不解释。GeoJSON 默认按 RFC 7946 的经纬度语义导出；调用者
+必须显式确认投影坐标才能导出。
+
+## 测试与工程要求
+
+测试使用独立构造的二进制字节、损坏输入、往返一致性和跨语言兼容性用例，覆盖
+记录长度、索引偏移、删除行、数值精度、字段编码、Z/M 范围和多边形拓扑。仓库
+通过 GitHub Actions 执行 `moon check`、`moon test`、`moon fmt --check`、
+WASM 构建及最小运行示例。项目采用 MIT 许可证；来源和参考范围见
+`THIRD_PARTY.md`。
+
+## 赛事交付记录
+
+当前仓库保留连续的功能开发历史，累计 20 次以上有实际内容的提交。当前版本的
+MoonBit 源文件共 4,021 行，其中包含测试；核心实现、测试和文档均按功能边界
+组织，不使用空提交或重复代码凑数。正式验收前继续以实际功能、测试和文档为准。
