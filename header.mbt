@@ -1,3 +1,4 @@
+///|
 /// Parsed file header; ranges remain available for inspection.
 pub(all) struct Header {
   file_length : Int
@@ -9,6 +10,7 @@ pub(all) struct Header {
   mmax : Double
 } derive(Debug)
 
+///|
 /// Resource limits apply before allocating point or record arrays.
 pub(all) struct ReadLimits {
   max_records : Int
@@ -17,6 +19,7 @@ pub(all) struct ReadLimits {
   max_file_bytes : Int
 } derive(Debug)
 
+///|
 pub fn ReadLimits::default() -> ReadLimits {
   {
     max_records: 1000000,
@@ -26,13 +29,17 @@ pub fn ReadLimits::default() -> ReadLimits {
   }
 }
 
+///|
 fn ReadLimits::validate(self : ReadLimits) -> Unit raise ShapeError {
-  if self.max_records < 0 || self.max_points_per_record < 0 ||
-    self.max_parts_per_record < 0 || self.max_file_bytes < 100 {
+  if self.max_records < 0 ||
+    self.max_points_per_record < 0 ||
+    self.max_parts_per_record < 0 ||
+    self.max_file_bytes < 100 {
     raise InvalidData(0, "invalid resource limits")
   }
 }
 
+///|
 /// Read and verify the 100-byte header. Full file bytes are required.
 pub fn read_header(data : Bytes) -> Header raise ShapeError {
   let r = ByteReader::new(data)
@@ -75,6 +82,7 @@ pub fn read_header(data : Bytes) -> Header raise ShapeError {
   { file_length, kind, bounds, zmin, zmax, mmin, mmax }
 }
 
+///|
 fn write_header(
   length : Int,
   kind : ShapeType,
@@ -84,7 +92,9 @@ fn write_header(
 ) -> Bytes {
   let w = ByteWriter::new()
   w.be32(9994)
-  for _ in 0..<5 { w.be32(0) }
+  for _ in 0..<5 {
+    w.be32(0)
+  }
   w.be32(length / 2)
   w.le32(1000)
   w.le32(kind.code())
@@ -95,14 +105,26 @@ fn write_header(
       w.f64(b.xmax)
       w.f64(b.ymax)
     }
-    None => for _ in 0..<4 { w.f64(0.0) }
+    None =>
+      for _ in 0..<4 {
+        w.f64(0.0)
+      }
   }
   match zrange {
-    Some((lo, hi)) => { w.f64(lo); w.f64(hi) }
-    None => { w.f64(0.0); w.f64(0.0) }
+    Some((lo, hi)) => {
+      w.f64(lo)
+      w.f64(hi)
+    }
+    None => {
+      w.f64(0.0)
+      w.f64(0.0)
+    }
   }
   match mrange {
-    Some((lo, hi)) => { w.f64(lo); w.f64(hi) }
+    Some((lo, hi)) => {
+      w.f64(lo)
+      w.f64(hi)
+    }
     None => {
       let no_data = if kind.has_m() { -1.0e39 } else { 0.0 }
       w.f64(no_data)
