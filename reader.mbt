@@ -63,6 +63,14 @@ pub fn ShpReader::next(self : ShpReader) -> Record? raise ShapeError {
     }
     None => ()
   }
+  if shape.kind.has_z() {
+    for p in shape.points {
+      match p.z {
+        Some(z) => if z < self.header.zmin || z > self.header.zmax { raise InvalidData(self.position + 8, "Z outside file bounds") }
+        None => ()
+      }
+    }
+  }
   let record = { number, offset: self.position, content_length, shape }
   self.position += 8 + content_length
   self.count += 1
@@ -178,6 +186,9 @@ fn decode_shape(data : Bytes, base : Int, limits : ReadLimits) -> Shape raise Sh
   let parts : Array[Int] = []
   let mut declared_bounds : Bounds? = None
   if kind.is_point() {
+    if limits.max_points_per_record < 1 {
+      raise InvalidData(base + r.pos, "point count exceeds configured limit")
+    }
     let x = r.f64()
     let y = r.f64()
     let z = if kind.has_z() { Some(r.f64()) } else { None }

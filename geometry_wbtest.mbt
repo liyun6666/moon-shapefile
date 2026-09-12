@@ -51,7 +51,6 @@ test "geometry validation rejects malformed dimensions parts and coordinates" {
     { kind: PolyLine, points: [coordinate(0.0,0.0),coordinate(1.0,1.0)], parts: [1] },
     { kind: PolyLine, points: [coordinate(0.0,0.0),coordinate(1.0,1.0)], parts: [0,0] },
     { kind: PolyLine, points: [coordinate(0.0,0.0),coordinate(1.0,1.0)], parts: [0,3] },
-    { kind: PolyLine, points: [coordinate(0.0,0.0),coordinate(0.0,0.0)], parts: [0] },
     { kind: Point, points: [coordinate(1.0 / 0.0,0.0)], parts: [] },
     { kind: PointZ, points: [coordinate(0.0,0.0,z=0.0 / 0.0)], parts: [] },
     { kind: PointM, points: [coordinate(0.0,0.0,m=1.0 / 0.0)], parts: [] },

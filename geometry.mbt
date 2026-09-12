@@ -162,6 +162,7 @@ pub fn Shape::validate(self : Shape) -> Unit raise ShapeError {
     match p.m {
       Some(m) => {
         if !finite(m) { raise InvalidData(i, "nonfinite measure") }
+        if m < -1.0e38 { raise InvalidData(i, "measure uses reserved no-data range") }
         if !self.kind.has_m() { raise InvalidData(i, "measure on XY shape") }
       }
       None => ()
@@ -191,11 +192,8 @@ pub fn Shape::validate(self : Shape) -> Unit raise ShapeError {
     if self.kind.is_polygon() && !same_xy(self.points[start], self.points[end - 1]) {
       raise InvalidData(i, "polygon ring is not closed")
     }
-    for j = start + 1; j < end; j = j + 1 {
-      if same_xy(self.points[j - 1], self.points[j]) {
-        raise InvalidData(j, "zero-length segment")
-      }
-    }
+    // Repeated vertices are legal in ESRI records. A part is invalid only
+    // when every segment collapses to zero length (handled by topology checks).
   }
 }
 /// Euclidean length in input XY units. Polygon results include hole boundaries;

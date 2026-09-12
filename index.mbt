@@ -112,6 +112,14 @@ pub fn IndexedReader::record_at(self : IndexedReader, index : Int) -> Record rai
     }
     None => ()
   }
+  if shape.kind.has_z() {
+    for p in shape.points {
+      match p.z {
+        Some(z) => if z < self.file_header.zmin || z > self.file_header.zmax { raise InvalidData(start, "Z outside file bounds") }
+        None => ()
+      }
+    }
+  }
   { number: index + 1, offset: entry.offset, content_length: entry.content_length, shape }
 }
 
