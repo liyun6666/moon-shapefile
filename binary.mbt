@@ -3,7 +3,7 @@ pub suberror ShapeError {
   InvalidData(Int, String)
 } derive(Debug)
 
-struct ByteReader {
+priv struct ByteReader {
   data : Bytes
   mut pos : Int
   end : Int
@@ -62,7 +62,7 @@ fn ByteReader::take(self : ByteReader, n : Int) -> Bytes raise ShapeError {
   result
 }
 
-struct ByteWriter {
+priv struct ByteWriter {
   data : Array[Byte]
 }
 
