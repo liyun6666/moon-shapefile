@@ -98,10 +98,10 @@ fn merge_bounds(a : Bounds?, b : Bounds?) -> Bounds? {
     (None, b) => b
     (a, None) => a
     (Some(a), Some(b)) => Some({
-      xmin: @math.minimum(a.xmin, b.xmin),
-      ymin: @math.minimum(a.ymin, b.ymin),
-      xmax: @math.maximum(a.xmax, b.xmax),
-      ymax: @math.maximum(a.ymax, b.ymax),
+      xmin: @cmp.minimum(a.xmin, b.xmin),
+      ymin: @cmp.minimum(a.ymin, b.ymin),
+      xmax: @cmp.maximum(a.xmax, b.xmax),
+      ymax: @cmp.maximum(a.ymax, b.ymax),
     })
   }
 }
