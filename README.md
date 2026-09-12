@@ -46,4 +46,4 @@ moon run cmd/main
 
 本项目采用 MIT 许可证。文件布局依据公开的 ESRI Shapefile Technical
 Description，DBF 兼容性参考 PyShp 的公开行为，但仓库不包含 PyShp 源代码。
-详细说明见 [THIRD_PARTY.md](THIRD_PARTY.md) 和 [docs/项目申报书.md](项目申报书.md)。
+详细说明见 [THIRD_PARTY.md](THIRD_PARTY.md) 和 [项目申报书](docs/项目申报书.md)。
