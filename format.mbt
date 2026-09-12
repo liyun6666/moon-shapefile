@@ -58,7 +58,7 @@ pub fn validate_filename_prefix(prefix : String) -> Unit raise ShapeError {
   if prefix.is_empty() || prefix.length() > 8 {
     raise InvalidData(0, "Shapefile prefix must be 1 to 8 characters")
   }
-  for ch in prefix.chars() {
+  for ch in prefix.iter() {
     if !((ch >= 'a' && ch <= 'z') ||
       (ch >= 'A' && ch <= 'Z') ||
       (ch >= '0' && ch <= '9') ||
