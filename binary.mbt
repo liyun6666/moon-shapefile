@@ -50,11 +50,6 @@ fn ByteReader::f64(self : ByteReader) -> Double raise ShapeError {
   bits.reinterpret_as_double()
 }
 
-fn ByteReader::skip(self : ByteReader, n : Int) -> Unit raise ShapeError {
-  self.require(n)
-  self.pos += n
-}
-
 fn ByteReader::take(self : ByteReader, n : Int) -> Bytes raise ShapeError {
   self.require(n)
   let result = self.data[self.pos:self.pos + n].to_owned()

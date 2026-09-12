@@ -23,7 +23,7 @@ pub fn read_dataset(shp : Bytes, shx : Bytes, dbf : Bytes, encoding? : @dbf.Enco
   d
 }
 
-pub fn write_dataset(self : Dataset, encoding? : @dbf.Encoding = @dbf.Utf8) -> DatasetFiles raise ShapeError {
+pub fn Dataset::write_dataset(encoding? : @dbf.Encoding = @dbf.Utf8) -> DatasetFiles raise ShapeError {
   self.validate()
   let files = write_shp(self.kind, self.shapes)
   let dbf = try { @dbf.write(self.table, encoding~) } catch { _ => raise InvalidData(0, "DBF table cannot be encoded") }
