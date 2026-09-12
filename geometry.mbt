@@ -198,3 +198,132 @@ pub fn Shape::validate(self : Shape) -> Unit raise ShapeError {
     }
   }
 }
+/// Euclidean length in input XY units. Polygon results include hole boundaries;
+/// point geometries have zero length. No geodesic interpretation is implied.
+pub fn Shape::planar_length(self : Shape) -> Double raise ShapeError {
+  self.validate()
+  let mut total = 0.0
+  for part = 0; part < self.parts.length(); part = part + 1 {
+    for i = self.parts[part]; i + 1 < self.part_end(part); i = i + 1 {
+      let dx = self.points[i + 1].x - self.points[i].x
+      let dy = self.points[i + 1].y - self.points[i].y
+      let ax = if dx < 0.0 { -dx } else { dx }
+      let ay = if dy < 0.0 { -dy } else { dy }
+      let scale = if ax > ay { ax } else { ay }
+      if !finite(scale) { raise InvalidData(i,"segment length overflows") }
+      if scale != 0.0 {
+        let sx = dx / scale
+        let sy = dy / scale
+        total += scale * (sx * sx + sy * sy).sqrt()
+      }
+      if !finite(total) { raise InvalidData(i,"total length overflows") }
+    }
+  }
+  total
+}
+
+/// Area in squared input XY units after topology validation. Winding has no
+/// effect; holes subtract and islands add. Non-polygons return zero.
+pub fn Shape::planar_area(self : Shape) -> Double raise ShapeError {
+  self.validate()
+  if !self.kind.is_polygon() { return 0.0 }
+  let parents = self.polygon_parents()
+  let mut area = 0.0
+  for i = 0; i < parents.length(); i = i + 1 {
+    let signed = self.ring_area(i)
+    let magnitude = (if signed < 0.0 { -signed } else { signed }) / 2.0
+    let mut parent = parents[i]
+    let mut depth = 0
+    while parent != -1 {
+      depth += 1
+      if depth > parents.length() { raise InvalidData(i,"cyclic polygon nesting") }
+      parent = parents[parent]
+    }
+    area += if depth % 2 == 0 { magnitude } else { -magnitude }
+    if !finite(area) { raise InvalidData(i,"total polygon area overflows") }
+  }
+  area
+}
+
+fn Shape::contains_point_unchecked(self : Shape, point : Coordinate) -> Bool raise ShapeError {
+  if self.kind.is_point() || self.kind.is_multi() {
+    for p in self.points { if same_xy(p,point) { return true } }
+    return false
+  }
+  for part = 0; part < self.parts.length(); part = part + 1 {
+    for i = self.parts[part]; i + 1 < self.part_end(part); i = i + 1 {
+      if on_segment(point,self.points[i],self.points[i + 1]) { return true }
+    }
+  }
+  if !self.kind.is_polygon() { return false }
+  let mut inside = false
+  for part = 0; part < self.parts.length(); part = part + 1 {
+    if self.ring_contains(part,point) { inside = !inside }
+  }
+  inside
+}
+
+/// Inclusive planar membership. Polygon boundaries (including hole boundaries)
+/// count as contained. Z and M are ignored; exact XY comparisons are used.
+pub fn Shape::contains_point(self : Shape, point : Coordinate) -> Bool raise ShapeError {
+  self.validate()
+  if !finite(point.x) || !finite(point.y) { raise InvalidData(0,"nonfinite query point") }
+  if self.kind.is_polygon() { ignore(self.polygon_parents()) }
+  self.contains_point_unchecked(point)
+}
+
+/// True geometric intersection with a closed XY rectangle, including touches.
+/// Unlike a bounding-box prefilter, this respects concavities and polygon holes.
+pub fn Shape::intersects_bounds(self : Shape, bounds : Bounds) -> Bool raise ShapeError {
+  self.validate()
+  bounds.validate()
+  if self.kind.is_polygon() { ignore(self.polygon_parents()) }
+  match self.bounds() {
+    None => return false
+    Some(own) => if !own.intersects(bounds) { return false }
+  }
+  for point in self.points { if bounds.contains(point) { return true } }
+  if self.kind.is_point() || self.kind.is_multi() { return false }
+  let corners = [
+    coordinate(bounds.xmin,bounds.ymin),
+    coordinate(bounds.xmax,bounds.ymin),
+    coordinate(bounds.xmax,bounds.ymax),
+    coordinate(bounds.xmin,bounds.ymax),
+  ]
+  for part = 0; part < self.parts.length(); part = part + 1 {
+    for i = self.parts[part]; i + 1 < self.part_end(part); i = i + 1 {
+      for side = 0; side < 4; side = side + 1 {
+        if segments_intersect(self.points[i],self.points[i + 1],corners[side],corners[(side + 1) % 4]) {
+          return true
+        }
+      }
+    }
+  }
+  self.kind.is_polygon() && self.contains_point_unchecked(corners[0])
+}
+
+/// Combine two valid bounding rectangles. Inputs are validated before use.
+pub fn Bounds::union(self : Bounds, other : Bounds) -> Bounds raise ShapeError {
+  self.validate()
+  other.validate()
+  {
+    xmin: if self.xmin < other.xmin { self.xmin } else { other.xmin },
+    ymin: if self.ymin < other.ymin { self.ymin } else { other.ymin },
+    xmax: if self.xmax > other.xmax { self.xmax } else { other.xmax },
+    ymax: if self.ymax > other.ymax { self.ymax } else { other.ymax },
+  }
+}
+
+/// Intersection can be a zero-width/height rectangle when boundaries touch.
+pub fn Bounds::intersection(self : Bounds, other : Bounds) -> Bounds? raise ShapeError {
+  self.validate()
+  other.validate()
+  if !self.intersects(other) { return None }
+  Some({
+    xmin: if self.xmin > other.xmin { self.xmin } else { other.xmin },
+    ymin: if self.ymin > other.ymin { self.ymin } else { other.ymin },
+    xmax: if self.xmax < other.xmax { self.xmax } else { other.xmax },
+    ymax: if self.ymax < other.ymax { self.ymax } else { other.ymax },
+  })
+}
+

@@ -1,9 +1,17 @@
 {
   "name": "liyun6666/moonbit9",
   "version": "0.1.0",
+  "deps": {
+    "moonbitlang/async": "0.21.3"
+  },
   "readme": "README.md",
   "repository": "https://github.com/liyun6666/moonbit9",
   "license": "MIT",
-  "keywords": ["shapefile", "gis", "dbf", "geojson"],
+  "keywords": [
+    "shapefile",
+    "gis",
+    "dbf",
+    "geojson"
+  ],
   "description": "MoonBit Shapefile geometry, index and attribute table reader/writer"
 }

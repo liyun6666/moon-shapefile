@@ -220,3 +220,81 @@ test "random access and projection preserve physical rows" {
     },
   )
 }
+
+///|
+test "resource caps and update date are explicit" {
+  let t = one_field(Character, 3, 0, Text("abc"))
+  let b = write(t, update_date={ year: 2026, month: 9, day: 12 })
+  assert_eq(b[1].to_int(), 126)
+  assert_eq(b[2].to_int(), 9)
+  assert_eq(b[3].to_int(), 12)
+  let limits : Limits = {
+    max_bytes: 1000,
+    max_records: 0,
+    max_fields: 10,
+    max_cells: 100,
+  }
+  assert_true(
+    try {
+      ignore(read(b, limits~))
+      false
+    } catch {
+      _ => true
+    },
+  )
+  assert_true(
+    try {
+      ignore(write(t, limits~))
+      false
+    } catch {
+      _ => true
+    },
+  )
+  let cells : Limits = {
+    max_bytes: 1000,
+    max_records: 10,
+    max_fields: 10,
+    max_cells: 0,
+  }
+  assert_true(
+    try {
+      ignore(read(b, limits=cells))
+      false
+    } catch {
+      _ => true
+    },
+  )
+  assert_eq(open_reader(b, limits=cells).row_at(0), t.rows[0])
+  assert_true(
+    try {
+      ignore(write(t, update_date={ year: 2100, month: 2, day: 29 }))
+      false
+    } catch {
+      _ => true
+    },
+  )
+  assert_eq(open_reader(b).rows_range(0, 1), t.rows)
+  assert_eq(open_reader(b).rows_range(1, 0), [])
+  assert_true(
+    try {
+      ignore(open_reader(b).rows_range(0, 2))
+      false
+    } catch {
+      _ => true
+    },
+  )
+}
+
+///|
+test "encoded validation is distinct from default UTF8 validation" {
+  let t = one_field(Character, 1, 0, Text("é"))
+  validate_table_encoded(t, Latin1)
+  assert_true(
+    try {
+      validate_table(t)
+      false
+    } catch {
+      _ => true
+    },
+  )
+}

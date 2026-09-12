@@ -42,7 +42,7 @@ pub fn validate_table(table : Table) -> Unit raise DbfError {
 pub fn write(
   table : Table,
   encoding? : Encoding = Utf8,
-  update_date? : UpdateDate = {year:2000,month:1,day:1},
+  update_date? : UpdateDate = { year: 2000, month: 1, day: 1 },
   limits? : Limits = default_limits(),
 ) -> Bytes raise DbfError {
   check_limits(limits)
@@ -52,7 +52,11 @@ pub fn write(
   if table.rows.length() > (2147483646 - header) / width {
     raise Invalid(4, "table exceeds supported byte length")
   }
-  if table.rows.length() > limits.max_records || table.fields.length() > limits.max_fields || header+table.rows.length()*width+1 > limits.max_bytes { raise Invalid(0,"output exceeds resource limits") }
+  if table.rows.length() > limits.max_records ||
+    table.fields.length() > limits.max_fields ||
+    header + table.rows.length() * width + 1 > limits.max_bytes {
+    raise Invalid(0, "output exceeds resource limits")
+  }
   // Validate every value before allocating the output buffer.
   for i, row in table.rows {
     if row.values.length() != table.fields.length() {
@@ -65,7 +69,7 @@ pub fn write(
   let data = Array::make(header + table.rows.length() * width + 1, b'\x00')
   data[0] = b'\x03'
   // Deterministic valid modification date: 2000-01-01.
-  data[1] = (update_date.year-1900).to_byte()
+  data[1] = (update_date.year - 1900).to_byte()
   data[2] = update_date.month.to_byte()
   data[3] = update_date.day.to_byte()
   for i = 0; i < 4; i = i + 1 {
@@ -154,4 +158,3 @@ pub fn project(table : Table, names : Array[String]) -> Table raise DbfError {
   }
   { fields, rows }
 }
-

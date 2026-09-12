@@ -152,7 +152,9 @@ pub fn open_reader(
   limits? : Limits = default_limits(),
 ) -> Reader raise DbfError {
   check_limits(limits)
-  if data.length() > limits.max_bytes { raise Invalid(0,"DBF exceeds byte limit") }
+  if data.length() > limits.max_bytes {
+    raise Invalid(0, "DBF exceeds byte limit")
+  }
   if data.length() < 33 {
     raise Invalid(0, "truncated DBF header")
   }
@@ -184,7 +186,9 @@ pub fn open_reader(
   if data.length() != end && (data.length() != end + 1 || data[end] != b'\x1a') {
     raise Invalid(end, "unexpected trailing bytes or invalid EOF marker")
   }
-  if count > limits.max_records || (header-33)/32 > limits.max_fields { raise Invalid(4,"DBF exceeds record or field limit") }
+  if count > limits.max_records || (header - 33) / 32 > limits.max_fields {
+    raise Invalid(4, "DBF exceeds record or field limit")
+  }
   let fields : Array[Field] = []
   for p = 32; p < header - 1; p = p + 32 {
     let mut n = 0
@@ -359,14 +363,19 @@ pub fn Reader::row_at(self : Reader, index : Int) -> Row raise DbfError {
 }
 
 ///|
-pub fn read(data : Bytes, encoding? : Encoding = Utf8, limits? : Limits = default_limits()) -> Table raise DbfError {
+pub fn read(
+  data : Bytes,
+  encoding? : Encoding = Utf8,
+  limits? : Limits = default_limits(),
+) -> Table raise DbfError {
   let reader = open_reader(data, encoding~, limits~)
-  if reader.schema.length() > 0 && reader.count > limits.max_cells/reader.schema.length() { raise Invalid(4,"DBF exceeds decoded cell limit; use row_at") }
+  if reader.schema.length() > 0 &&
+    reader.count > limits.max_cells / reader.schema.length() {
+    raise Invalid(4, "DBF exceeds decoded cell limit; use row_at")
+  }
   let rows : Array[Row] = []
   for i = 0; i < reader.count; i = i + 1 {
     rows.push(reader.row_at(i))
   }
   { fields: reader.fields(), rows }
 }
-
-
