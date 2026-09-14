@@ -1,4 +1,4 @@
 ///|
 fn main {
-  println("moonbit9: Shapefile IO")
+  println("moon-shapefile: Shapefile IO")
 }

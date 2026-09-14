@@ -1,7 +1,7 @@
-# moonbit9 设计说明
+# moon-shapefile 设计说明
 
 项目负责人：马昀昀。唯一提交仓库为
-<https://github.com/liyun6666/moonbit9>，远程默认分支为 `main`。
+<https://github.com/liyun6666/moon-shapefile>，远程默认分支为 `main`。
 
 ## 定位与接口
 

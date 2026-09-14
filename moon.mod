@@ -1,10 +1,10 @@
-name = "liyun6666/moonbit9"
+name = "liyun6666/moon-shapefile"
 
 version = "0.1.0"
 
 readme = "README.md"
 
-repository = "https://github.com/liyun6666/moonbit9"
+repository = "https://github.com/liyun6666/moon-shapefile"
 
 license = "MIT"
 

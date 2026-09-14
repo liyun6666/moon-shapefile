@@ -1,6 +1,6 @@
-# moonbit9
+# moon-shapefile
 
-`moonbit9` 是使用 MoonBit 编写的 Shapefile 地理数据读写与转换库，提供
+`moon-shapefile` 是使用 MoonBit 编写的 Shapefile 地理数据读写与转换库，提供
 SHP 几何文件、SHX 索引文件和 DBF 属性表的联合处理能力。
 
 ## 项目能力
@@ -17,12 +17,12 @@ SHP 几何文件、SHX 索引文件和 DBF 属性表的联合处理能力。
 
 ```mbt
 let shape = {
-  kind: @moonbit9.Point,
-  points: [@moonbit9.coordinate(116.4, 39.9)],
+  kind: @shapefile.Point,
+  points: [@shapefile.coordinate(116.4, 39.9)],
   parts: [],
 }
-let files = @moonbit9.write_shp(@moonbit9.Point, [shape])
-let parsed = @moonbit9.read_shp(files.shp)
+let files = @shapefile.write_shp(@shapefile.Point, [shape])
+let parsed = @shapefile.read_shp(files.shp)
 println(parsed.records.length().to_string())
 ```
 

@@ -18,5 +18,5 @@ SHP、SHX 文件的字节布局依据公开的《ESRI Shapefile Technical Descri
 
 ## 本项目许可证
 
-moonbit9 采用 MIT 许可证，完整文本见根目录 `LICENSE`。第三方资料只用于格式
+moon-shapefile 采用 MIT 许可证，完整文本见根目录 `LICENSE`。第三方资料只用于格式
 兼容和行为核对，不改变本项目代码的版权归属。

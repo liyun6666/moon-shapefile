@@ -2,14 +2,14 @@
 
 > **For agentic workers:** use superpowers:subagent-driven-development for independent package work and local execution for dependent integration.
 
-**Goal:** Deliver real Shapefile IO, filtering and GeoJSON conversion to liyun6666/moonbit9.
+**Goal:** Deliver real Shapefile IO, filtering and GeoJSON conversion to liyun6666/moon-shapefile.
 **Architecture:** Checked byte codecs feed typed SHP records and independent DBF records. Dataset layer preserves physical alignment. Native CLI performs filesystem IO.
 **Tech Stack:** MoonBit 0.10.9+, Python PyShp for external interoperability tests.
 **Spec:** docs/design.md
 
 ## Global constraints
 
-- Repository and package: liyun6666/moonbit9; MIT; primary language MoonBit.
+- Repository and package: liyun6666/moon-shapefile; MIT; primary language MoonBit.
 - More than 4000 effective implementation lines, tests counted separately.
 - At least ten commits tied to actual functional milestones; no empty commits.
 - No MultiPatch, Memo, reprojection, network or ZIP API.
