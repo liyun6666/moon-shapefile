@@ -5,18 +5,25 @@
 - 工具链：MoonBit 0.10.9。
 - 本地命令：`moon check --deny-warn`、`moon test --deny-warn`、
   `moon fmt --check`、`moon build --target wasm-gc` 均通过。
-- 测试结果：47 个测试通过，失败 0 个；覆盖二进制边界、SHP/SHX、DBF、
+- 测试结果（2026-09-23 本地修复后）：50 个测试通过，失败 0 个；覆盖二进制边界、SHP/SHX、DBF、
   删除标记、数值精度、Z/M 坐标、GeoJSON 拓扑和数据集筛选。
-- 运行示例：`moon run cmd/main` 可输出 `moon-shapefile: Shapefile IO`。
-- 规模：MoonBit 源文件总计 4,021 行，包含 855 行测试；不把生成文件计入提交。
+- 运行示例：`moon run cmd/main` 实际执行 SHP/SHX/DBF 联合读写、属性筛选，
+  断言几何及属性一致后输出含 `NAME=Beijing` 的 GeoJSON。
+- 规模：代码持续变动，旧记录 4,021 行已失效；不以物理行数代替有效实现规模。
 - 提交历史：20 次以上有实际内容的功能提交，没有使用空提交或重复提交。
 - 许可证：根目录 MIT；PyShp 参考范围和 ESRI 格式说明见 `THIRD_PARTY.md`。
-- Mooncakes：已发布 `liyun6666/moon-shapefile@0.1.0`。
+- Mooncakes：此前已核验发布 `liyun6666/moon-shapefile@0.1.0`；本次修复版本为 `0.1.1`，发布状态以 Mooncakes 页面为准。
 - 重复项目：复查 Mooncakes 模块目录后，未发现直接重复的 SHP/SHX/DBF 读写项目；
   `geo-mbt` 属于几何算法库，功能边界不同。
 - CI：GitHub Actions 使用官方 MoonBit 安装脚本，并执行检查、测试、格式、WASM
-  构建和运行示例。
+  构建和运行示例。工作流已改为 `moon fmt --check`，远程执行结果以对应提交的 Actions 记录为准。
 - 申报书：见 `docs/项目申报书.md`，提交问卷时应以本人最终核实内容为准。
 
 仍需在正式提交前确认：项目是否曾以相同范围参加过往届赛事，以及当前发布版本
 是否需要在新增代码后递增 Mooncakes 版本号。
+
+2026-09-23：新增 Latin1 一字节字符联合读写及导出回归、GeoJSON 属性类型与
+精度保留测试、删除行处理及非法数据拒绝测试。`moon check --deny-warn`、
+`moon test --deny-warn`、`moon fmt --check`、`moon build --target wasm-gc`、
+`moon run cmd/main`、`moon info` 均在修复后实际通过。
+Gitlink 同步、实际参赛批次与旧名称 moonbit9 的申报关系仍需确认。

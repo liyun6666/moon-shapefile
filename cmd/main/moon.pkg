@@ -1,4 +1,6 @@
 import {
+  "liyun6666/moon-shapefile" @shapefile,
+  "liyun6666/moon-shapefile/dbf",
 }
 
 pkgtype(kind: "executable")

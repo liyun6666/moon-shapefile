@@ -16,7 +16,10 @@ pub(all) struct DatasetFiles {
 } derive(Debug)
 
 ///|
-pub fn Dataset::validate(self : Dataset) -> Unit raise ShapeError {
+pub fn Dataset::validate(
+  self : Dataset,
+  encoding? : @dbf.Encoding = @dbf.Utf8,
+) -> Unit raise ShapeError {
   if self.shapes.length() != self.table.rows.length() {
     raise InvalidData(0, "geometry and DBF row counts differ")
   }
@@ -26,7 +29,7 @@ pub fn Dataset::validate(self : Dataset) -> Unit raise ShapeError {
     }
     s.validate()
   }
-  ignore(@dbf.validate_table(self.table)) catch {
+  ignore(@dbf.validate_table_encoded(self.table, encoding)) catch {
     _ => raise InvalidData(0, "invalid DBF table")
   }
 }
@@ -50,7 +53,7 @@ pub fn read_dataset(
     table,
     prj,
   }
-  d.validate()
+  d.validate(encoding~)
   d
 }
 
@@ -59,7 +62,7 @@ pub fn Dataset::write_dataset(
   self : Dataset,
   encoding? : @dbf.Encoding = @dbf.Utf8,
 ) -> DatasetFiles raise ShapeError {
-  self.validate()
+  self.validate(encoding~)
   let files = write_shp(self.kind, self.shapes)
   let dbf = @dbf.write(self.table, encoding~) catch {
     _ => raise InvalidData(0, "DBF table cannot be encoded")
@@ -140,20 +143,32 @@ pub fn Dataset::project_fields(
 }
 
 ///|
+/// Export DBF fields as properties. Decimal values remain exact strings;
+/// dates use YYYYMMDD strings, logical values use booleans, Missing uses null.
+/// encoding controls DBF width validation, not the JSON text encoding.
 pub fn Dataset::to_geojson(
   self : Dataset,
   allow_projected? : Bool = false,
   include_deleted? : Bool = false,
+  encoding? : @dbf.Encoding = @dbf.Utf8,
 ) -> Json raise ShapeError {
-  self.validate()
+  self.validate(encoding~)
   let features : Array[Json] = []
   for i in 0..<self.shapes.length() {
     if include_deleted || !self.table.rows[i].deleted {
+      let properties : Map[String, Json] = Map([])
+      for j, field in self.table.fields {
+        properties[field.name] = match self.table.rows[i].values[j] {
+          @dbf.Text(s) | @dbf.Number(s) | @dbf.DateValue(s) => Json::string(s)
+          @dbf.LogicalValue(v) => Json::boolean(v)
+          @dbf.Missing => Json::null()
+        }
+      }
       features.push(
         Json::object({
           "type": Json::string("Feature"),
           "geometry": self.shapes[i].to_geojson(allow_projected~),
-          "properties": Json::null(),
+          "properties": Json::object(properties),
         }),
       )
     }

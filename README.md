@@ -15,6 +15,22 @@ SHP 几何文件、SHX 索引文件和 DBF 属性表的联合处理能力。
 
 ## 最小示例
 
+在使用方 MoonBit 项目中安装依赖：
+
+```bash
+moon add liyun6666/moon-shapefile@0.1.1
+```
+
+在使用方的 `moon.pkg` 中配置导入：
+
+```moonbit
+import {
+  "liyun6666/moon-shapefile" @shapefile,
+}
+```
+
+以下代码放在 `fn main raise { ... }` 中运行：
+
 ```mbt
 let shape = {
   kind: @shapefile.Point,
@@ -25,6 +41,26 @@ let files = @shapefile.write_shp(@shapefile.Point, [shape])
 let parsed = @shapefile.read_shp(files.shp)
 println(parsed.records.length().to_string())
 ```
+
+本仓库的完整示例位于 `cmd/main/main.mbt`，执行 `moon run cmd/main`：
+构造带 `NAME=Beijing` 属性的点数据集，写入并读取 SHP/SHX/DBF 字节，
+断言几何和属性一致，按属性筛选后输出带 `properties` 的 GeoJSON。
+示例在内存中运行，无需下载外部样本或配置文件路径。
+
+## 属性导出与编码
+
+`Dataset::to_geojson` 按 DBF 字段名导出所有属性：字符和日期为字符串
+（日期保留 `YYYYMMDD`），Numeric/Float 也使用字符串，以保留大整数、
+小数尾零及符号；逻辑值为 JSON 布尔值，Missing 为 `null`。
+默认跳过标记删除的物理行，`include_deleted=true` 可包含这些行。
+导出仅支持数据集到 FeatureCollection；GeoJSON 导入接口接收几何对象。
+
+DBF 默认按 UTF-8 检查字段字节宽度。处理 Latin1 文件时，
+`read_dataset`、`write_dataset`、`Dataset::validate` 和 `Dataset::to_geojson`
+均须传入 `encoding=@dbf.Latin1`（使用方需导入
+`"liyun6666/moon-shapefile/dbf"`）。Dataset 不保存源编码；JSON 字符串
+保留解码后的 Unicode 文本，导出参数只控制 DBF 字段宽度校验。
+若改用 UTF-8 写出，需相应扩大字符字段宽度，不能静默截断。
 
 运行测试和检查：
 
