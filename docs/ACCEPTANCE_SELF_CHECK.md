@@ -2,7 +2,7 @@
 
 - 仓库：<https://github.com/liyun6666/moon-shapefile>，默认分支：`main`。
 - 申请人：马昀昀；仓库主要提交者与申请人一致。
-- 工具链：MoonBit 0.10.9。
+- 工具链：MoonBit 0.10.9+6e6c44045；CI 固定相同版本以复现本地发布检查。
 - 本地命令：`moon check --deny-warn`、`moon test --deny-warn`、
   `moon fmt --check`、`moon build --target wasm-gc` 均通过。
 - 测试结果（2026-09-23 本地修复后）：50 个测试通过，失败 0 个；覆盖二进制边界、SHP/SHX、DBF、
